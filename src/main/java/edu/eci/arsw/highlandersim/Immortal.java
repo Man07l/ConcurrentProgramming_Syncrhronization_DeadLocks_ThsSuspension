@@ -6,6 +6,8 @@ import java.util.Random;
 public class Immortal extends Thread {
 
     private ImmortalUpdateReportCallback updateCallback=null;
+
+    private Controller controller;
     
     private int health;
     
@@ -18,18 +20,20 @@ public class Immortal extends Thread {
     private final Random r = new Random(System.currentTimeMillis());
 
 
-    public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb) {
+    public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb, Controller controller) {
         super(name);
         this.updateCallback=ucb;
         this.name = name;
         this.immortalsPopulation = immortalsPopulation;
         this.health = health;
         this.defaultDamageValue=defaultDamageValue;
+        this.controller=controller;
     }
 
     public void run() {
 
         while (true) {
+
             Immortal im;
 
             int myIndex = immortalsPopulation.indexOf(this);
@@ -56,22 +60,33 @@ public class Immortal extends Thread {
     }
 
     public void fight(Immortal i2) {
-
-        if (i2.getHealth() > 0) {
-            i2.changeHealth(i2.getHealth() - defaultDamageValue);
-            this.health += defaultDamageValue;
-            updateCallback.processReport("Fight: " + this + " vs " + i2+"\n");
-        } else {
-            updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
+        try {
+            controller.verifyPaused();
+        }
+        catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-    }
+        Immortal first = this.hashCode() < i2.hashCode() ? this : i2;
+        Immortal second = first == this ? i2 : this;
 
-    public void changeHealth(int v) {
+        synchronized (first) {
+            synchronized (second) {
+                if (i2.getHealth() > 0) {
+                    i2.changeHealth(i2.getHealth() - defaultDamageValue);
+                    this.health += defaultDamageValue;
+                    updateCallback.processReport("Fight: " + this + " vs " + i2+"\n");
+                } else {
+                    updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
+                }
+            }
+        }
+    }
+    public synchronized void changeHealth(int v) {
         health = v;
     }
 
-    public int getHealth() {
+    public synchronized int getHealth() {
         return health;
     }
 

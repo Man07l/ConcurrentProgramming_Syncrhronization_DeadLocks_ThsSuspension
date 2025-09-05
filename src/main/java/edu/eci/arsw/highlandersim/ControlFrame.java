@@ -27,6 +27,8 @@ public class ControlFrame extends JFrame {
     private static final int DEFAULT_IMMORTAL_HEALTH = 100;
     private static final int DEFAULT_DAMAGE_VALUE = 10;
 
+    private static Controller controller = new Controller();
+
     private JPanel contentPane;
 
     private List<Immortal> immortals;
@@ -87,19 +89,15 @@ public class ControlFrame extends JFrame {
         JButton btnPauseAndCheck = new JButton("Pause and check");
         btnPauseAndCheck.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
-                /*
-				 * COMPLETAR
-                 */
-                int sum = 0;
-                for (Immortal im : immortals) {
-                    sum += im.getHealth();
-                }
-
-                statisticsLabel.setText("<html>"+immortals.toString()+"<br>Health sum:"+ sum);
-                
-                
-
+                controller.pause();
+                while (!controller.allPaused()) {}
+                    synchronized (immortals) {
+                        int sum = 0;
+                        for (Immortal im : immortals) {
+                            sum += im.getHealth();
+                        }
+                        statisticsLabel.setText("<html>" + immortals.toString() + "<br>Health sum:" + sum);
+                    }
             }
         });
         toolBar.add(btnPauseAndCheck);
@@ -108,10 +106,7 @@ public class ControlFrame extends JFrame {
 
         btnResume.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                /**
-                 * IMPLEMENTAR
-                 */
-
+                controller.resume();
             }
         });
 
@@ -128,6 +123,13 @@ public class ControlFrame extends JFrame {
         JButton btnStop = new JButton("STOP");
         btnStop.setForeground(Color.RED);
         toolBar.add(btnStop);
+        btnStop.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+
 
         scrollPane = new JScrollPane();
         contentPane.add(scrollPane, BorderLayout.CENTER);
@@ -148,11 +150,12 @@ public class ControlFrame extends JFrame {
         
         try {
             int ni = Integer.parseInt(numOfImmortals.getText());
+            controller.setTotalThreads(ni);
 
             List<Immortal> il = new LinkedList<Immortal>();
 
             for (int i = 0; i < ni; i++) {
-                Immortal i1 = new Immortal("im" + i, il, DEFAULT_IMMORTAL_HEALTH, DEFAULT_DAMAGE_VALUE,ucb);
+                Immortal i1 = new Immortal("im" + i, il, DEFAULT_IMMORTAL_HEALTH, DEFAULT_DAMAGE_VALUE,ucb,controller);
                 il.add(i1);
             }
             return il;
