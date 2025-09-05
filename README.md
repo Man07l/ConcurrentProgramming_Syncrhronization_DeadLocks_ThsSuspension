@@ -2,6 +2,10 @@
 ## Escuela Colombiana de Ingeniería
 ### Arquitecturas de Software – ARSW
 
+### Integrantes: 
+- Manuel David Robayo Vega 
+- William Camilo Hernández Deaza
+
 
 #### Ejercicio – programación concurrente, condiciones de carrera y sincronización de hilos. EJERCICIO INDIVIDUAL O EN PAREJAS.
 
