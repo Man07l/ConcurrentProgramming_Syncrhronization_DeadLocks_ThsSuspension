@@ -10,8 +10,18 @@
 Control de hilos con wait/notify. Productor/consumidor.
 
 1. Revise el funcionamiento del programa y ejecútelo. Mientras esto ocurren, ejecute jVisualVM y revise el consumo de CPU del proceso correspondiente. A qué se debe este consumo?, cual es la clase responsable?
-2. Haga los ajustes necesarios para que la solución use más eficientemente la CPU, teniendo en cuenta que -por ahora- la producción es lenta y el consumo es rápido. Verifique con JVisualVM que el consumo de CPU se reduzca.
-3. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.
+   ![CPUbadPerformance](/media/img/img1.png)
+- El consumo alto de la CPU se debe a la clase Consumer pues ejecuta un bucle infinito sin interrupciones y verifica constantemente si hay elementos en la cola.
+
+2. Haga los ajustes necesarios para que la solución use más eficientemente la CPU, teniendo en cuenta que -por ahora- la producción es lenta y el consumo es rápido. Verifique con JVisualVM que el consumo de CPU se reduzca.  
+   ![CPUgoodPerformance](/media/img/img2.png)
+- Para reducir el consumo de la CPU se definió la cola como BlockingQueue para sincronizar el uso de la misma. Además se usaron metodos como take() y put() para no tener que realizar la verificación de disponibilidad de elementos en la cola.  
+
+3. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.  
+   ![stockQueue](/media/img/img3.png)  
+   ![queueGoodPerformance](/media/img/img4.png)
+- Definimos que la cola tenga un limite de 20 elementos y produzca de manera más rápida para que el consumidor tenga que esperar a que haya elementos disponibles en la cola. Al llegar al tope, se respeta el número establecido sin provocar un aumento en el consumo de CPU pues el tipo de cola definida (BlockingQueue) tiene un mecanismo de espera para cuando la cola está llena.  
+
 
 
 ##### Parte II. – Antes de terminar la clase.
